@@ -4,8 +4,8 @@ pipeline {
         AWS_ACCESS_KEY='aws_credencials'
         SSH_KEY = credentials('d2250590-e41c-4157-9756-95f9ba817f08')
         DOCKER_HUB_CREDENTIALS= 'docker-hub-credentials'
-        DOCKER_FRONTEND = 'flowerking21/learnersreport_frontend'
-        DOCKER_BACKEND = 'flowerking21/learnersreport_backend'
+        DOCKER_FRONTEND = 'safayavatsal/learnersreport_frontend'
+        DOCKER_BACKEND = 'safayavatsal/learnersreport_backend'
        
     }
 
@@ -14,7 +14,7 @@ pipeline {
         stage('CHECKOUT') {
             steps {
                 echo 'clone the git code' 
-                git branch: 'main', url:'https://github.com/flowerpoo/Container-Orchestration.git'
+                git branch: 'main', url:'https://github.com/safayavatsal/Orchestration.git'
             }
         }
         
