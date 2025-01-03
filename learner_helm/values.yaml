@@ -1,0 +1,24 @@
+deployments: 
+  backendname: backend
+  frontendname: frontend 
+  
+image:
+  backend:
+    repository: flowerking21
+    name: learnersreport_backend
+    tag: latest
+    port: 4200
+  frontend:
+    repository: flowerking21
+    name: learnersreport_frontend
+    tag: latest
+    port: 3000
+   
+
+# resources:
+#   cpu: 500m
+#   memory: 128MI 
+
+services:
+  backendname: backend-service
+  frontendname: frontend-service
