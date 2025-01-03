@@ -9,6 +9,7 @@ The provided GitHub repositories contain the frontend and backend codebases, whi
 
 https://github.com/UnpredictablePrashant/learnerReportCS_frontend
 https://github.com/UnpredictablePrashant/learnerReportCS_backend
+
 Please ensure to document your process thoroughly, including any challenges faced and solutions implemented. Your submission should demonstrate your understanding of Kubernetes deployment, HELM charts, and Jenkins automation in the context of a MERN stack application.
 
 -------------------------------------------------------------------------------
