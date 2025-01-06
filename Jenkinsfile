@@ -1,83 +1,78 @@
 pipeline {
     agent any
-    environment{
-        AWS_ACCESS_KEY='aws_credencials'
+    environment {
         SSH_KEY = credentials('d2250590-e41c-4157-9756-95f9ba817f08')
-        DOCKER_HUB_CREDENTIALS= 'docker-hub-credentials'
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKER_FRONTEND = 'safayavatsal/learnersreport_frontend'
         DOCKER_BACKEND = 'safayavatsal/learnersreport_backend'
-       
     }
 
     stages {
-        
         stage('CHECKOUT') {
             steps {
-                echo 'clone the git code' 
-                git branch: 'main', url:'https://github.com/safayavatsal/Orchestration.git'
+                echo 'Cloning the Git repository'
+                git branch: 'main', url: 'https://github.com/safayavatsal/Orchestration.git'
             }
         }
-        
-        
-        stage('build images') {
+
+        stage('Build Images') {
             parallel {
-                stage('build backend') {
+                stage('Build Backend') {
                     steps {
                         script {
-                            docker.build("${env.DOCKER_BACKEND}:${env.BUILD_ID}", './learnerReportCS_backend/')
-                            echo ("done")
+                            docker.build("${DOCKER_BACKEND}:${BUILD_ID}", './learnerReportCS_backend/')
+                            echo 'Backend build completed'
                         }
                     }
                 }
-                stage('build frontend') {
+                stage('Build Frontend') {
                     steps {
                         script {
-                             docker.build("${env.DOCKER_FRONTEND}:${env.BUILD_ID}", './learnerReportCS_backend/')
-                             echo ("done")
+                            docker.build("${DOCKER_FRONTEND}:${BUILD_ID}", './learnerReportCS_frontend/')
+                            echo 'Frontend build completed'
                         }
                     }
                 }
             }
         }
-        
-        stage('push to docker'){
-            steps{
-                script{
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        docker.image("${env.DOCKER_BACKEND}:${env.BUILD_ID}").push()
-                        docker.image("${env.DOCKER_FRONTEND}:${env.BUILD_ID}").push()
-                       echo ("done")
+
+        stage('Push to Docker') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
+                        docker.image("${DOCKER_BACKEND}:${BUILD_ID}").push()
+                        docker.image("${DOCKER_FRONTEND}:${BUILD_ID}").push()
+                        echo 'Docker images pushed successfully'
                     }
                 }
             }
         }
-        
-        stage('eks connection'){
-            steps{
-                script{
-                     withCredentials([aws(credentialsId: 'aws_credencials', region:'us-east-1')]) {
-                        echo "login success"
-                        def eksClusterExists = sh(script: 'aws eks describe-cluster --name poo-learnersreport-eks-cluster-1 --region us-east-1', 
-                        returnStatus: true) == 0
-                        if(!eksClusterExists)
-                        {
+
+        stage('EKS Connection') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws_credencials', region: 'us-east-1') {
+                        echo 'AWS login successful'
+                        def eksClusterExists = sh(
+                            script: 'aws eks describe-cluster --name poo-learnersreport-eks-cluster-1 --region us-east-1',
+                            returnStatus: true
+                        ) == 0
+
+                        if (!eksClusterExists) {
+                            echo 'EKS cluster does not exist. Creating a new cluster...'
                             sh '''
-                            eksctl create cluster --name poo-learnersreport-eks-cluster-1 --region us-east-1 --nodegroup-name standard-workers --node-type t3.micro --nodes 2 --nodes-min 1 --nodes-max 3
+                                eksctl create cluster --name poo-learnersreport-eks-cluster-1 \
+                                --region us-east-1 --nodegroup-name standard-workers \
+                                --node-type t3.micro --nodes 2 --nodes-min 1 --nodes-max 3
                             '''
                         }
-                        
-                        sh "aws eks update-kubeconfig --name poo-learnersreport-eks-cluster-1 --region us-east-1"
-                        sh "helm upgrade --install learnreport Learners_helm"
-                        
-                        
-                       
-                        
+
+                        sh 'aws eks update-kubeconfig --name poo-learnersreport-eks-cluster-1 --region us-east-1'
+                        sh 'helm upgrade --install learnreport ./Learners_helm'
+                        echo 'EKS deployment completed'
                     }
                 }
             }
         }
-        
-        
-        
     }
 }
