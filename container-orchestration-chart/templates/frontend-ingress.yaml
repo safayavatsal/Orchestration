@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "container-orchestration-chart.fullname" . }}-learnercs-fe-ingress
+spec:
+  rules:
+    - host: cloudcrypto.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "container-orchestration-chart.fullname" . }}-learnercs-fe
+                port:
+                  number: 80
+                  
