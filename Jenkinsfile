@@ -29,7 +29,7 @@ pipeline {
         HELM_RELEASE_NAME_FE = 'frontend-chart'
         
         AWS_REGION = 'us-east-1'
-        AWS_EKS_CLUSTER_NAME = 'my-eks-cluster-jenkins'
+        AWS_EKS_CLUSTER_NAME = 'container-orchestration-cluster'
     }
     
     stages {
