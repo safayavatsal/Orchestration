@@ -1,0 +1,122 @@
+---
+# Source: container-orchestration-chart/templates/backend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-be-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: learnercs-be
+  ports:
+  - port: 80
+    targetPort: 5000
+---
+# Source: container-orchestration-chart/templates/frontend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-fe-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: learnercs-fe
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+# Source: container-orchestration-chart/templates/backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-be-pod
+  labels:
+    app: learnercs-be
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: learnercs-be
+  template:
+    metadata:
+      labels:
+        app: learnercs-be
+    spec:
+      containers:
+      - name: learnercs-be
+        image: "surendergupta/learnercs_be:latest"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 512Mi        
+            cpu: 1000m
+        ports:
+        - containerPort: 5000
+---
+# Source: container-orchestration-chart/templates/frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-fe-pod
+  labels:
+    app: learnercs-fe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learnercs-fe
+  template:
+    metadata:
+      labels:
+        app: learnercs-fe
+    spec:
+      containers:
+      - name: learnercs-fe
+        image: surendergupta/learnercs_fe:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 512Mi        
+            cpu: 1000m
+        ports:
+        - containerPort: 3000
+---
+# Source: container-orchestration-chart/templates/backend-ingress.yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-be-ingress
+spec:
+  rules:
+    - host: api.cloudcrypto.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: learnercs-be
+                port:
+                  number: 80
+---
+# Source: container-orchestration-chart/templates/frontend-ingress.yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-container-orchestration-chart-learnercs-fe-ingress
+spec:
+  rules:
+    - host: cloudcrypto.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: learnercs-fe
+                port:
+                  number: 80
